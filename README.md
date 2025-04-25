@@ -1,4 +1,4 @@
-# Simulink 2024b to 2023b Downgrader
+# convertSLX - Simulink File Version Conversion Tool
 
 A simple tool to convert Simulink `.slx` files saved in a newer version back to a previous version by updating internal XML metadata.
 
