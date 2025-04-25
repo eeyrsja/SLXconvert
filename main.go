@@ -194,7 +194,7 @@ func processDirectory(dir string) error {
 			}
 		} else {
 			ext := strings.ToLower(filepath.Ext(file.Name()))
-			if ext == ".slx" || ext == ".sldd" || ext == ".mldatx" {
+			if ext == ".slx" {
 				// Process SLX, SLDD, or MLDATX file
 				fmt.Printf("Processing: %s\n", path)
 				out, err := convertSLX(path)
@@ -217,7 +217,7 @@ func main() {
 	// Custom usage message
 	flag.Usage = func() {
 		prog := filepath.Base(os.Args[0])
-		fmt.Fprintf(os.Stderr, "Usage: %s [options] <input.slx|.sldd|.mldatx or directory>\n\n", prog)
+		fmt.Fprintf(os.Stderr, "Usage: %s [options] <input.slx or directory>\n\n", prog)
 		fmt.Fprintf(os.Stderr, "Options:\n")
 		fmt.Fprintf(os.Stderr, "  -d, --directory    Process all .slx/.sldd/.mldatx files in directory recursively\n")
 		fmt.Fprintf(os.Stderr, "  --r2022a           Set output to R2023b\n")

@@ -17,13 +17,13 @@ go build
 ## Usage
 
 ```sh
-convertSLX.exe [options] <input.slx|.sldd|.mldatx or directory>
+convertSLX.exe [options] <input.slx or directory>
 ```
 
 ### Options:
 
 ```
-  -d, --directory    Process all .slx/.sldd/.mldatx files in directory recursively
+  -d, --directory    Process all .slx files in directory recursively
   --r2022a           Set output to R2023b
   --r2022b           Set output to R2024a
   --r2023a           Set output to R2024b
@@ -36,8 +36,6 @@ convertSLX.exe [options] <input.slx|.sldd|.mldatx or directory>
 
 ```sh
 convertSLX.exe --r2023b model.slx                  # Convert a single file to R2023B
-
-convertSLX.exe --r2022a data.sldd                  # Convert a single file to R2022A
 
 convertSLX.exe --2024a -d folder_with_archives    # Convert all .slx, .sldd, or .mldatx files in directory to R2024A
 ```
