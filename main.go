@@ -2,6 +2,7 @@ package main
 
 import (
 	"archive/zip"
+	"compress/flate"
 	"flag"
 	"fmt"
 	"io"
@@ -37,30 +38,7 @@ func updateVersions(xmlPath string, updates map[string]string) error {
 		}
 	}
 	if modified {
-		// Disable XML declaration output
-		doc.WriteSettings.CanonicalEndTags = false
-		doc.WriteSettings.CanonicalText = false
-		doc.WriteSettings.CanonicalAttrVal = false
-
-		// Convert to string
-		xmlString, err := doc.WriteToString()
-		if err != nil {
-			return err
-		}
-
-		// Remove XML declaration if present
-		if strings.HasPrefix(xmlString, "<?xml") {
-			endIndex := strings.Index(xmlString, "?>")
-			if endIndex > 0 {
-				xmlString = xmlString[endIndex+2:]
-			}
-		}
-
-		// Trim leading whitespace/newlines
-		xmlString = strings.TrimLeft(xmlString, "\r\n\t ")
-
-		// Write manually to file
-		return os.WriteFile(xmlPath, []byte(xmlString), 0644)
+		return doc.WriteToFile(xmlPath)
 	}
 	return nil
 }
@@ -106,6 +84,11 @@ func zipDir(src, dest string) error {
 	defer zf.Close()
 	zw := zip.NewWriter(zf)
 	defer zw.Close()
+
+	// Set the zip writer to use more compatible settings
+	zw.RegisterCompressor(zip.Deflate, func(out io.Writer) (io.WriteCloser, error) {
+		return flate.NewWriter(out, flate.DefaultCompression)
+	})
 
 	return filepath.Walk(src, func(path string, info os.FileInfo, err error) error {
 		if err != nil || info.IsDir() {
