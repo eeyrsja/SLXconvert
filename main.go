@@ -82,34 +82,58 @@ func zipDir(src, dest string) error {
 		return err
 	}
 	defer zf.Close()
+
+	// Create a new zip writer
 	zw := zip.NewWriter(zf)
 	defer zw.Close()
 
-	// Set the zip writer to use more compatible settings
+	// Use standard Deflate compression
 	zw.RegisterCompressor(zip.Deflate, func(out io.Writer) (io.WriteCloser, error) {
 		return flate.NewWriter(out, flate.DefaultCompression)
 	})
 
-	return filepath.Walk(src, func(path string, info os.FileInfo, err error) error {
+	// Don't use UTF-8 flag for file names
+	zw.SetComment("") // Empty comment to avoid UTF-8 flag
+
+	err = filepath.Walk(src, func(path string, info os.FileInfo, err error) error {
 		if err != nil || info.IsDir() {
 			return err
 		}
+
 		rel, err := filepath.Rel(src, path)
 		if err != nil {
 			return err
 		}
-		w, err := zw.Create(rel)
+
+		// Convert Windows backslashes to forward slashes
+		rel = strings.ReplaceAll(rel, "\\", "/")
+
+		// Create file header without UTF-8 flag
+		header := &zip.FileHeader{
+			Name:     rel,
+			Method:   zip.Deflate,
+			Modified: info.ModTime(),
+		}
+
+		// Clear UTF-8 flag - crucial for MATLAB compatibility
+		header.Flags &= ^uint16(1 << 11)
+
+		w, err := zw.CreateHeader(header)
 		if err != nil {
 			return err
 		}
+
 		f, err := os.Open(path)
 		if err != nil {
 			return err
 		}
 		defer f.Close()
+
 		_, err = io.Copy(w, f)
 		return err
 	})
+
+	return err
 }
 
 func convertSLX(slx string) (string, error) {
